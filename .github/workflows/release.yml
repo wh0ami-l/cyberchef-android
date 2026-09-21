@@ -31,19 +31,23 @@ jobs:
                   distribution: temurin
                   java-version: "17"
 
-            - name: Set up Node
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "24"
-                  cache: npm
-                  cache-dependency-path: CyberChef/package-lock.json
-
+            # CyberChef is not in this repository, so it has to be cloned before
+            # Node is set up: the npm cache is keyed on CyberChef/package-lock.json,
+            # and setup-node fails outright ("Some specified paths were not
+            # resolved, unable to cache dependencies") if that file is missing.
             - name: Clone upstream CyberChef at the pinned revision
               run: |
                   . ./CYBERCHEF_VERSION
                   git clone "$REPOSITORY" CyberChef
                   git -C CyberChef checkout "$COMMIT"
                   echo "CyberChef $VERSION @ ${COMMIT:0:8}"
+
+            - name: Set up Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "24"
+                  cache: npm
+                  cache-dependency-path: CyberChef/package-lock.json
 
             - name: Build the web bundle
               working-directory: CyberChef
@@ -56,6 +60,13 @@ jobs:
 
             - name: Install SDK packages
               run: sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+            # The Gradle in toolchain/ is gitignored (it is ~130 MB), so CI
+            # installs the same version instead of using the local copy.
+            - name: Set up Gradle
+              uses: gradle/actions/setup-gradle@v4
+              with:
+                  gradle-version: "8.10.2"
 
             - name: Decode the signing keystore
               env:
@@ -75,10 +86,8 @@ jobs:
                   KEY_ALIAS: cyberchef
                   KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
               run: |
-                  export JAVA_HOME="$JAVA_HOME"
-                  export ANDROID_HOME="$ANDROID_SDK_ROOT"
                   node scripts/package-web.mjs
-                  ./toolchain/gradle-8.10.2/bin/gradle -p android assembleRelease --console=plain
+                  gradle -p android assembleRelease --console=plain
 
             - name: Verify the signature
               run: |
