@@ -1,0 +1,8 @@
+// Top-level build file. Plugin versions are declared here and applied in :app.
+plugins {
+    id "com.android.application" version "8.7.3" apply false
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.layout.buildDirectory
+}

@@ -1,0 +1,1243 @@
+/**
+ * CyberChef Mobile — touch layout for the Android shell.
+ *
+ * This stylesheet is injected into the production build by
+ * scripts/package-web.mjs. It is a pure override layer: the upstream CyberChef
+ * sources are never modified, so the bundled app can be refreshed from
+ * upstream at any time.
+ *
+ * Everything is scoped to `html.cc-mobile`, which is set by cc-preinit.js
+ * before first paint on small or touch-primary screens. Wide screens keep
+ * CyberChef's native multi-pane desktop layout untouched.
+ *
+ * @copyright Crown Copyright 2016-2026
+ * @license Apache-2.0
+ */
+
+/* ==========================================================================
+   Design tokens
+   ========================================================================== */
+
+html.cc-mobile {
+    /* Height of the three fixed bars that frame the workspace. */
+    --cc-topbar-h: 52px;
+    --cc-actions-h: 58px;
+    --cc-tabbar-h: 58px;
+
+    /* Chrome colours, matching the launcher icon and the native system bars. */
+    --cc-brand: #1f3a5f;
+    --cc-brand-dark: #16293f;
+    --cc-brand-light: #2c5282;
+    --cc-accent: #4c9aff;
+
+    /* Compact pane headers; the desktop value is 48px. */
+    --title-height: 46px;
+    --tab-height: 38px;
+}
+
+/* Landscape phones have very little vertical room: shrink the chrome. */
+@media (orientation: landscape) and (max-height: 540px) {
+    html.cc-mobile {
+        --cc-topbar-h: 42px;
+        --cc-actions-h: 50px;
+        --cc-tabbar-h: 48px;
+        --title-height: 42px;
+    }
+}
+
+/* ==========================================================================
+   Page shell
+   ========================================================================== */
+
+html.cc-mobile,
+html.cc-mobile body {
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+}
+
+html.cc-mobile #content-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+}
+
+/* The workspace sits between the top bar and the action bar + tab bar. */
+html.cc-mobile #workspace-wrapper {
+    position: absolute;
+    top: var(--cc-topbar-h);
+    bottom: calc(var(--cc-actions-h) + var(--cc-tabbar-h));
+    left: 0;
+    right: 0;
+    width: auto;
+}
+
+/* ==========================================================================
+   Panes — one visible at a time, always full bleed
+   ========================================================================== */
+
+html.cc-mobile div#operations,
+html.cc-mobile div#recipe,
+html.cc-mobile #IO {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    float: none !important;
+    display: none;
+}
+
+html.cc-mobile div#input,
+html.cc-mobile div#output {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    float: none !important;
+    display: none;
+}
+
+html.cc-mobile .cc-pane-active {
+    display: block !important;
+}
+
+/* The operations list scrolls as one column (as it does on desktop) but keeps
+   the title and search box pinned to the top. A flex split was avoided here:
+   when a search is active CyberChef leaves the category list in the DOM, and
+   the two would have fought over the available height. */
+html.cc-mobile #operations {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+html.cc-mobile #operations > .title {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+html.cc-mobile #operations > #search {
+    position: sticky;
+    top: var(--title-height);
+    z-index: 3;
+    background-color: var(--primary-background-colour);
+}
+
+html.cc-mobile #operations > #search-results {
+    background-color: var(--primary-background-colour);
+}
+
+/* Split.js is left running (its layout is overridden above) but its drag
+   handles must never be reachable on a touch screen. */
+html.cc-mobile .gutter {
+    display: none !important;
+}
+
+/* ==========================================================================
+   Pane headers
+   ========================================================================== */
+
+html.cc-mobile .title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 8px 4px 12px;
+    line-height: normal;
+    font-size: 15px;
+}
+
+html.cc-mobile .title > label {
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+/* pane-controls is absolutely positioned on desktop; make it an inline row. */
+html.cc-mobile .pane-controls {
+    position: static;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    flex: 0 1 auto;
+    /* Without this a flex item refuses to shrink below its content, so a pane
+       with several header buttons pushes the slot picker off the edge. The
+       controls scroll instead; the picker is not negotiable, because losing it
+       makes the slot impossible to re-point. */
+    min-width: 0;
+}
+
+html.cc-mobile .pane-controls::-webkit-scrollbar {
+    display: none;
+}
+
+html.cc-mobile .pane-controls .btn {
+    flex: 0 0 auto;
+    margin-left: 0;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+html.cc-mobile .io-info {
+    margin-right: 8px;
+    height: auto;
+    font-size: 9.5px;
+    flex: 0 0 auto;
+}
+
+html.cc-mobile #magic {
+    min-width: 38px;
+    min-height: 38px;
+}
+
+/* ==========================================================================
+   Top bar (CyberChef's #banner, restyled as an app bar)
+   ========================================================================== */
+
+html.cc-mobile #banner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: var(--cc-topbar-h);
+    margin: 0;
+    padding: 0 4px 0 14px;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    background-color: var(--cc-brand);
+    color: #fff;
+    border-bottom: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .28);
+    z-index: 30;
+}
+
+/* The "Download CyberChef" column is meaningless inside an APK. */
+html.cc-mobile #banner > .col:first-child,
+html.cc-mobile #notice-wrapper {
+    display: none !important;
+}
+
+html.cc-mobile #banner > .col:last-child {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    margin-left: auto;
+    padding: 0 !important;
+    flex: 0 0 auto;
+}
+
+html.cc-mobile #banner a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    color: #fff;
+    /* Collapse the text label, keep it for screen readers. */
+    font-size: 0;
+    line-height: 1;
+    opacity: .92;
+    text-decoration: none;
+}
+
+html.cc-mobile #banner a:active {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, .12);
+    border-radius: 8px;
+}
+
+html.cc-mobile #banner i.material-icons {
+    font-size: 22px;
+    padding: 0;
+    vertical-align: middle;
+}
+
+html.cc-mobile .cc-app-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: .2px;
+    white-space: nowrap;
+}
+
+html.cc-mobile .cc-app-title .cc-version {
+    font-size: 10.5px;
+    font-weight: 400;
+    opacity: .6;
+}
+
+/* ==========================================================================
+   Action bar — CyberChef's #controls, relocated and made permanent
+   ========================================================================== */
+
+html.cc-mobile #controls {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: var(--cc-tabbar-h);
+    width: auto;
+    height: var(--cc-actions-h);
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--primary-border-colour);
+    background-color: var(--secondary-background-colour);
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, .08);
+    z-index: 25;
+}
+
+html.cc-mobile #controls-content {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    /* adjustWidth() applies a scale transform on desktop; kill it. */
+    transform: none !important;
+}
+
+html.cc-mobile #controls .btn {
+    border-radius: 24px;
+    margin: 0;
+    min-height: 42px;
+    font-size: 14px;
+}
+
+html.cc-mobile #step {
+    flex: 0 0 auto;
+    padding: 0 16px;
+}
+
+html.cc-mobile #bake {
+    flex: 1 1 auto;
+    width: auto !important;
+    background-color: var(--cc-brand);
+    color: #fff;
+}
+
+html.cc-mobile #bake img {
+    height: 22px;
+    margin-right: 6px;
+}
+
+html.cc-mobile #controls .form-group {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+html.cc-mobile #auto-bake-label {
+    width: auto;
+    min-width: 58px;
+    font-size: 11.5px;
+    line-height: 1.25;
+    padding: 0 4px;
+}
+
+/* ==========================================================================
+   Bottom tab bar
+   ========================================================================== */
+
+html.cc-mobile #cc-tabbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--cc-tabbar-h);
+    display: flex;
+    flex-flow: row nowrap;
+    background-color: var(--cc-brand);
+    box-shadow: 0 -1px 4px rgba(0, 0, 0, .22);
+    z-index: 26;
+}
+
+html.cc-mobile #cc-tabbar .cc-tab {
+    flex: 1 1 0;
+    min-width: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, .68);
+    font-family: var(--primary-font-family);
+    font-size: 10.5px;
+    letter-spacing: .2px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color .12s ease;
+}
+
+html.cc-mobile #cc-tabbar .cc-tab i.material-icons {
+    font-size: 22px;
+    line-height: 1;
+}
+
+html.cc-mobile #cc-tabbar .cc-tab.cc-active {
+    color: #fff;
+}
+
+html.cc-mobile #cc-tabbar .cc-tab.cc-active::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 22%;
+    right: 22%;
+    height: 3px;
+    border-radius: 0 0 3px 3px;
+    background-color: var(--cc-accent);
+}
+
+html.cc-mobile #cc-tabbar .cc-tab:active {
+    background-color: rgba(255, 255, 255, .08);
+}
+
+html.cc-mobile #cc-tabbar .cc-badge {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    margin-left: 6px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background-color: var(--cc-accent);
+    color: #10233b;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+html.cc-mobile #cc-tabbar .cc-badge:empty {
+    display: none;
+}
+
+/* Landscape: put the icon and label side by side to save vertical room. */
+@media (orientation: landscape) and (max-height: 540px) {
+    html.cc-mobile #cc-tabbar .cc-tab {
+        flex-direction: row;
+        gap: 6px;
+        font-size: 11px;
+    }
+
+    html.cc-mobile #cc-tabbar .cc-tab i.material-icons {
+        font-size: 18px;
+    }
+}
+
+/* ==========================================================================
+   Operations list — touch targets and tap-to-add affordances
+   ========================================================================== */
+
+html.cc-mobile #search {
+    height: 46px;
+    font-size: 16px; /* >=16px stops mobile browsers zooming on focus */
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+html.cc-mobile .category-title {
+    padding: 14px 14px;
+    font-size: 15px;
+}
+
+html.cc-mobile .op-list li.operation {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 12px 14px;
+    font-size: 15px;
+    /* `grab` is meaningless on touch and suppresses the native feedback. */
+    cursor: pointer;
+}
+
+html.cc-mobile .op-list li.operation::after {
+    content: "add";
+    font-family: "Material Icons";
+    font-size: 18px;
+    margin-left: auto;
+    padding-left: 10px;
+    color: var(--op-list-operation-font-colour);
+    opacity: .55;
+}
+
+html.cc-mobile .op-list li.operation:active {
+    filter: brightness(94%);
+}
+
+/* ==========================================================================
+   Recipe list — explicit per-step controls for touch
+   ========================================================================== */
+
+html.cc-mobile #rec-list .operation {
+    padding: 14px;
+    cursor: default;
+}
+
+html.cc-mobile .cc-op-actions {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--primary-border-colour);
+}
+
+html.cc-mobile .cc-op-actions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    min-height: 38px;
+    padding: 0;
+    border: 1px solid var(--primary-border-colour);
+    border-radius: 8px;
+    background-color: var(--primary-background-colour);
+    color: var(--primary-font-colour);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html.cc-mobile .cc-op-actions button i.material-icons {
+    font-size: 20px;
+}
+
+html.cc-mobile .cc-op-actions button:active {
+    filter: brightness(92%);
+}
+
+html.cc-mobile .cc-op-actions button[disabled] {
+    opacity: .35;
+}
+
+html.cc-mobile .cc-op-actions .cc-op-delete {
+    color: #c0392b;
+    border-color: rgba(192, 57, 43, .35);
+}
+
+/* Arguments are easier to hit when they are a little taller. */
+html.cc-mobile .operation .form-control {
+    font-size: 15px;
+}
+
+html.cc-mobile .operation input.arg,
+html.cc-mobile .operation select.arg {
+    min-height: 48px;
+}
+
+html.cc-mobile textarea.arg {
+    min-height: 96px;
+}
+
+html.cc-mobile .ingredients {
+    column-gap: 10px;
+}
+
+/* ==========================================================================
+   Input / Output editors
+   ========================================================================== */
+
+html.cc-mobile .cm-editor .cm-content {
+    font-size: var(--cc-editor-font, 13px);
+}
+
+html.cc-mobile .cm-status-bar {
+    font-size: 9.5px;
+    margin: 0 4px;
+}
+
+html.cc-mobile .cm-status-bar i {
+    font-size: 13px;
+    margin-left: 6px;
+}
+
+/* CodeMirror's own search/replace panel needs room on a phone. */
+html.cc-mobile .cm-panels.cm-panels-top {
+    border-bottom: 1px solid var(--primary-border-colour);
+}
+
+html.cc-mobile .cm-panel input,
+html.cc-mobile .cm-panel button,
+html.cc-mobile .cm-panel label {
+    font-size: 13px;
+}
+
+html.cc-mobile #input-tabs-wrapper,
+html.cc-mobile #output-tabs-wrapper {
+    height: var(--tab-height);
+}
+
+html.cc-mobile #input-tabs li,
+html.cc-mobile #output-tabs li {
+    min-width: 104px;
+}
+
+html.cc-mobile .input-tab-content,
+html.cc-mobile .output-tab-content {
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 12.5px;
+}
+
+html.cc-mobile .input-tab-buttons,
+html.cc-mobile .output-tab-buttons {
+    width: 34px;
+    font-size: 15px;
+}
+
+html.cc-mobile #output-loader-animation {
+    width: 70%;
+    height: 55%;
+    top: 8%;
+}
+
+/* ==========================================================================
+   Modals, popovers and snackbars
+   ========================================================================== */
+
+html.cc-mobile .modal-dialog {
+    margin: 10px;
+    max-width: none;
+    min-height: calc(100% - 20px);
+    display: flex;
+    align-items: center;
+}
+
+html.cc-mobile .modal-content {
+    max-height: calc(100vh - 20px);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+html.cc-mobile .modal-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1 1 auto;
+}
+
+html.cc-mobile .modal-footer {
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+html.cc-mobile .modal-footer .btn {
+    min-height: 44px;
+    flex: 1 1 auto;
+}
+
+html.cc-mobile .modal-body .btn {
+    min-height: 44px;
+}
+
+html.cc-mobile .modal-header .close {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+html.cc-mobile #keybList {
+    font-size: 13px;
+}
+
+/* Description popovers fire on hover on desktop; keep them in the viewport. */
+html.cc-mobile .popover {
+    max-width: min(92vw, 420px);
+}
+
+/* CyberChef shows snackbars inside a fixed, full-width container pinned to the
+   bottom of the viewport, which puts the message underneath the action bar and
+   the tab bar. The *container* is the positioned element — `.snackbar` itself
+   is static, so setting `bottom` on it has no effect. */
+html.cc-mobile #snackbar-container {
+    bottom: calc(var(--cc-actions-h) + var(--cc-tabbar-h) + 10px) !important;
+    padding: 0 8px;
+    box-sizing: border-box;
+}
+
+html.cc-mobile .snackbar {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+html.cc-mobile .snackbar-content {
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   Preloader
+   ========================================================================== */
+
+html.cc-mobile #loader-wrapper {
+    z-index: 1000;
+}
+
+html.cc-mobile .loading-msg,
+html.cc-mobile .loading-error {
+    width: auto;
+    left: 0;
+    right: 0;
+    padding: 0 24px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+html.cc-mobile .loader {
+    width: 110px;
+    height: 110px;
+    margin: -55px 0 0 -55px;
+}
+
+/* ==========================================================================
+   Workspace modes
+   ==========================================================================
+
+   Two arrangements share one set of pane elements:
+
+     tabs   one pane at a time, chosen from the bottom tab bar (the default)
+     split  two panes at once, separated by a divider the user drags
+
+   The split ratio is a single custom property, --cc-split-size, written on
+   #workspace-wrapper. A drag therefore costs one style recalculation of the
+   workspace subtree and nothing else: no JavaScript measures or mutates pane
+   geometry. The panes themselves stay absolutely positioned, exactly as they
+   are in tabs mode, so CyberChef's own sizing code never has to be re-educated.
+   ========================================================================== */
+
+html.cc-mobile.cc-split {
+    --cc-split-size: 50%;
+}
+
+/* The tab bar is redundant while two panes are on screen, so the workspace
+   reclaims its height. */
+html.cc-mobile.cc-split #cc-tabbar {
+    display: none !important;
+}
+
+html.cc-mobile.cc-split #workspace-wrapper {
+    bottom: var(--cc-actions-h);
+}
+
+html.cc-mobile.cc-split #controls {
+    bottom: 0;
+}
+
+html.cc-mobile.cc-split #snackbar-container {
+    bottom: calc(var(--cc-actions-h) + 10px) !important;
+}
+
+/* Nothing may animate while a divider is being dragged. */
+html.cc-mobile.cc-dragging * {
+    transition: none !important;
+}
+
+/* --- slot visibility ---------------------------------------------------- */
+
+html.cc-mobile.cc-split div#operations.cc-slot-first,
+html.cc-mobile.cc-split div#recipe.cc-slot-first,
+html.cc-mobile.cc-split #IO.cc-slot-first,
+html.cc-mobile.cc-split div#operations.cc-slot-second,
+html.cc-mobile.cc-split div#recipe.cc-slot-second,
+html.cc-mobile.cc-split #IO.cc-slot-second {
+    display: block !important;
+    float: none !important;
+}
+
+/* --- stacked (the portrait default) ------------------------------------- */
+
+html.cc-mobile.cc-split.cc-split-v div#operations.cc-slot-first,
+html.cc-mobile.cc-split.cc-split-v div#recipe.cc-slot-first,
+html.cc-mobile.cc-split.cc-split-v #IO.cc-slot-first {
+    top: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: var(--cc-split-size) !important;
+}
+
+html.cc-mobile.cc-split.cc-split-v div#operations.cc-slot-second,
+html.cc-mobile.cc-split.cc-split-v div#recipe.cc-slot-second,
+html.cc-mobile.cc-split.cc-split-v #IO.cc-slot-second {
+    top: var(--cc-split-size) !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+}
+
+/* --- side by side (the landscape default) ------------------------------- */
+
+html.cc-mobile.cc-split.cc-split-h div#operations.cc-slot-first,
+html.cc-mobile.cc-split.cc-split-h div#recipe.cc-slot-first,
+html.cc-mobile.cc-split.cc-split-h #IO.cc-slot-first {
+    top: 0 !important;
+    left: 0 !important;
+    right: auto !important;
+    bottom: 0 !important;
+    width: var(--cc-split-size) !important;
+    height: 100% !important;
+}
+
+html.cc-mobile.cc-split.cc-split-h div#operations.cc-slot-second,
+html.cc-mobile.cc-split.cc-split-h div#recipe.cc-slot-second,
+html.cc-mobile.cc-split.cc-split-h #IO.cc-slot-second {
+    top: 0 !important;
+    left: var(--cc-split-size) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: auto !important;
+    height: 100% !important;
+}
+
+/* ==========================================================================
+   Divider
+   ========================================================================== */
+
+html.cc-mobile #cc-splitter {
+    position: absolute;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* The handle owns the gesture: without this the WebView would scroll the
+       pane underneath while the divider is being dragged. */
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    background: transparent;
+}
+
+html.cc-mobile #cc-splitter::before {
+    content: "";
+    position: absolute;
+    background-color: var(--primary-border-colour);
+}
+
+html.cc-mobile.cc-split-v #cc-splitter {
+    left: 0;
+    right: 0;
+    top: var(--cc-split-size);
+    height: 30px;
+    margin-top: -15px;
+    cursor: row-resize;
+}
+
+html.cc-mobile.cc-split-v #cc-splitter::before {
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+}
+
+html.cc-mobile.cc-split-h #cc-splitter {
+    top: 0;
+    bottom: 0;
+    left: var(--cc-split-size);
+    width: 30px;
+    margin-left: -15px;
+    cursor: col-resize;
+}
+
+html.cc-mobile.cc-split-h #cc-splitter::before {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    margin-left: -1px;
+}
+
+html.cc-mobile .cc-splitter-grip {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid var(--primary-border-colour);
+    border-radius: 12px;
+    background-color: var(--secondary-background-colour);
+    color: var(--primary-font-colour);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+    cursor: inherit;
+}
+
+html.cc-mobile.cc-split-v .cc-splitter-grip {
+    width: 66px;
+    height: 24px;
+}
+
+html.cc-mobile.cc-split-h .cc-splitter-grip {
+    width: 24px;
+    height: 66px;
+}
+
+html.cc-mobile .cc-splitter-grip i.material-icons {
+    font-size: 18px;
+    line-height: 1;
+    opacity: .7;
+}
+
+html.cc-mobile.cc-split-h .cc-splitter-grip i.material-icons {
+    transform: rotate(90deg);
+}
+
+html.cc-mobile.cc-dragging .cc-splitter-grip,
+html.cc-mobile #cc-splitter:focus-visible .cc-splitter-grip {
+    background-color: var(--cc-brand);
+    border-color: var(--cc-brand);
+    color: #fff;
+}
+
+html.cc-mobile.cc-dragging .cc-splitter-grip i.material-icons {
+    opacity: 1;
+}
+
+/* ==========================================================================
+   Slot picker — "which pane lives here"
+   ========================================================================== */
+
+html.cc-mobile .cc-slot-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 0 10px;
+    border: 1px solid var(--primary-border-colour);
+    border-radius: 17px;
+    background-color: var(--primary-background-colour);
+    color: var(--primary-font-colour);
+    font-family: var(--primary-font-family);
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html.cc-mobile .cc-slot-picker i.material-icons {
+    font-size: 16px;
+    opacity: .65;
+}
+
+html.cc-mobile .cc-slot-picker:active {
+    filter: brightness(94%);
+}
+
+html.cc-mobile .cc-pane-menu {
+    position: fixed;
+    z-index: 70;
+    min-width: 168px;
+    padding: 6px;
+    border: 1px solid var(--primary-border-colour);
+    border-radius: 12px;
+    background-color: var(--secondary-background-colour);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, .3);
+}
+
+html.cc-mobile .cc-pane-menu-item {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    padding: 0 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--primary-font-colour);
+    font-family: var(--primary-font-family);
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html.cc-mobile .cc-pane-menu-item.cc-on {
+    background-color: var(--cc-brand);
+    color: #fff;
+    font-weight: 600;
+}
+
+html.cc-mobile .cc-pane-menu-item[disabled] {
+    opacity: .38;
+}
+
+/* ==========================================================================
+   Workspace sheet
+   ========================================================================== */
+
+html.cc-mobile #cc-sheet-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    background-color: rgba(0, 0, 0, .45);
+}
+
+html.cc-mobile #cc-workspace-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 61;
+    max-height: 84vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+    border-radius: 18px 18px 0 0;
+    background-color: var(--secondary-background-colour);
+    color: var(--primary-font-colour);
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, .34);
+}
+
+html.cc-mobile .cc-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+html.cc-mobile .cc-sheet-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+html.cc-mobile .cc-sheet-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: 22px;
+    background: transparent;
+    color: var(--primary-font-colour);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html.cc-mobile .cc-sheet-hint {
+    margin: 0 0 14px;
+    font-size: 12.5px;
+    line-height: 1.45;
+    opacity: .72;
+}
+
+html.cc-mobile .cc-sheet-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    padding: 4px 0;
+    border-top: 1px solid var(--primary-border-colour);
+}
+
+html.cc-mobile .cc-sheet-row.cc-muted {
+    opacity: .4;
+}
+
+html.cc-mobile .cc-sheet-label {
+    flex: 1 1 auto;
+    font-size: 14px;
+}
+
+html.cc-mobile .cc-seg {
+    display: flex;
+    flex: 0 0 auto;
+    border: 1px solid var(--primary-border-colour);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+html.cc-mobile .cc-seg button {
+    min-height: 42px;
+    padding: 0 12px;
+    border: none;
+    border-right: 1px solid var(--primary-border-colour);
+    background: transparent;
+    color: var(--primary-font-colour);
+    font-family: var(--primary-font-family);
+    font-size: 13px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html.cc-mobile .cc-seg button:last-child {
+    border-right: none;
+}
+
+html.cc-mobile .cc-seg button.cc-on {
+    background-color: var(--cc-brand);
+    color: #fff;
+}
+
+html.cc-mobile .cc-select {
+    flex: 0 0 auto;
+    min-height: 44px;
+    min-width: 132px;
+    padding: 0 10px;
+    border: 1px solid var(--primary-border-colour);
+    border-radius: 10px;
+    background-color: var(--primary-background-colour);
+    color: var(--primary-font-colour);
+    font-family: var(--primary-font-family);
+    font-size: 14px;
+}
+
+html.cc-mobile .cc-sheet-slider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+html.cc-mobile .cc-sheet-slider input[type="range"] {
+    width: 150px;
+    height: 44px;
+    margin: 0;
+    accent-color: var(--cc-brand);
+}
+
+html.cc-mobile .cc-sheet-value {
+    min-width: 44px;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    opacity: .8;
+}
+
+html.cc-mobile .cc-preset-row {
+    display: flex;
+    gap: 8px;
+}
+
+html.cc-mobile .cc-preset {
+    min-width: 54px;
+    min-height: 42px;
+    padding: 0 10px;
+    border: 1px solid var(--primary-border-colour);
+    border-radius: 10px;
+    background-color: var(--primary-background-colour);
+    color: var(--primary-font-colour);
+    font-family: var(--primary-font-family);
+    font-size: 13px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html.cc-mobile .cc-preset.cc-on {
+    background-color: var(--cc-brand);
+    border-color: var(--cc-brand);
+    color: #fff;
+}
+
+html.cc-mobile .cc-sheet-btn {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 18px;
+    border: 1px solid var(--primary-border-colour);
+    border-radius: 12px;
+    background-color: var(--primary-background-colour);
+    color: var(--primary-font-colour);
+    font-family: var(--primary-font-family);
+    font-size: 15px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html.cc-mobile .cc-sheet-btn:active {
+    filter: brightness(94%);
+}
+
+/* A phone in landscape has almost no height; the sheet must stay usable. */
+@media (orientation: landscape) and (max-height: 540px) {
+    html.cc-mobile #cc-workspace-sheet {
+        max-height: 92vh;
+        padding-top: 6px;
+    }
+
+    html.cc-mobile .cc-sheet-row {
+        min-height: 46px;
+    }
+
+    html.cc-mobile .cc-sheet-hint {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   Desktop-layout escape hatch
+   ==========================================================================
+
+   Deliberately NOT scoped to html.cc-mobile: this button exists precisely when
+   that class is absent, i.e. while the desktop layout is in force. The desktop
+   layout has no app bar to hold the mode switch, and the touch chrome that
+   normally carries it has been torn down, so without this the switch would be a
+   one-way trip. */
+
+#cc-layout-escape {
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    z-index: 2147483000;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 15px 0 12px;
+    border: none;
+    border-radius: 22px;
+    background-color: #1f3a5f;
+    color: #fff;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, .34);
+    -webkit-tap-highlight-color: transparent;
+}
+
+#cc-layout-escape:hover {
+    background-color: #2c5282;
+}
+
+#cc-layout-escape:active {
+    transform: scale(.97);
+}
+
+#cc-layout-escape i.material-icons {
+    font-size: 20px;
+    line-height: 1;
+}

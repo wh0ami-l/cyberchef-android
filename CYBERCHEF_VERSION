@@ -1,0 +1,6 @@
+# The upstream CyberChef revision this Android port is built against.
+# scripts/bootstrap.sh checks out exactly this, so a fresh clone reproduces a
+# byte-identical web bundle.
+VERSION=11.5.0
+COMMIT=ae4617c600e0cb687492f8e2672c09425106f5e9
+REPOSITORY=https://github.com/gchq/CyberChef.git

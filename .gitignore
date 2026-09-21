@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# Build output
+# ---------------------------------------------------------------------------
+/CyberChef-app-*.apk
+/build/
+**/build/
+.gradle/
+.build-tmp/
+/dsdex/
+
+# ---------------------------------------------------------------------------
+# Local toolchain — hundreds of megabytes, and specific to one machine.
+# scripts/bootstrap.sh fetches what is missing.
+# ---------------------------------------------------------------------------
+/sdk/
+/toolchain/
+/local.properties
+**/local.properties
+
+# ---------------------------------------------------------------------------
+# Secrets. Both of these together let anyone sign an APK that Android accepts
+# as an update to an installed copy. They must never be committed.
+# ---------------------------------------------------------------------------
+android/keystore.properties
+android/keystore/
+*.jks
+*.keystore
+
+# ---------------------------------------------------------------------------
+# Upstream checkout. Populated by scripts/bootstrap.sh at the pinned commit
+# recorded in CYBERCHEF_VERSION, so it does not belong in this repository
+# (it also carries 4500+ commits of its own history).
+# ---------------------------------------------------------------------------
+/CyberChef/
+
+# ---------------------------------------------------------------------------
+# Generated web assets. scripts/package-web.mjs copies these out of
+# CyberChef/build/prod and injects the mobile layer; committing them would add
+# ~58 MB of build output that a rebuild reproduces exactly.
+# ---------------------------------------------------------------------------
+/android/app/src/main/assets/www/
+
+# ---------------------------------------------------------------------------
+# Node
+# ---------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+
+# ---------------------------------------------------------------------------
+# Editors and OS noise
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

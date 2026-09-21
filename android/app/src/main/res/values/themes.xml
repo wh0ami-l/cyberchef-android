@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      The WebView draws the whole UI. The native chrome is limited to the
+      system bars, which are painted in the CyberChef brand colour so they read
+      as a continuous frame around the web content.
+    -->
+    <style name="Theme.CyberChef" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/cc_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:colorAccent">@color/cc_brand</item>
+    </style>
+</resources>

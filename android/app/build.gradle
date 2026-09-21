@@ -1,0 +1,108 @@
+plugins {
+    id "com.android.application"
+}
+
+// ---------------------------------------------------------------------------
+// Release signing
+//
+// The keystore and its password are secrets. If both leak, anyone can sign an
+// APK that Android accepts as an update to an already installed copy, so
+// neither is kept in version control. Credentials are read, in order, from:
+//
+//   1. android/keystore.properties        (local builds; gitignored)
+//   2. the environment                    (CI: KEYSTORE_FILE, KEYSTORE_PASSWORD,
+//                                          KEY_ALIAS, KEY_PASSWORD)
+//
+// A release build without credentials fails loudly rather than silently
+// producing an unsigned or debug-signed APK.
+// ---------------------------------------------------------------------------
+def signingPropsFile = rootProject.file("keystore.properties")
+def signingProps = new Properties()
+if (signingPropsFile.exists()) {
+    signingPropsFile.withInputStream { signingProps.load(it) }
+}
+
+def signingValue = { String propKey, String envKey ->
+    // A path in keystore.properties is relative to the android/ directory.
+    if (signingProps.getProperty(propKey)) return signingProps.getProperty(propKey)
+    return System.getenv(envKey)
+}
+
+def storePath = signingValue("storeFile", "KEYSTORE_FILE")
+def storePass = signingValue("storePassword", "KEYSTORE_PASSWORD")
+def keyAliasName = signingValue("keyAlias", "KEY_ALIAS") ?: "cyberchef"
+def keyPass = signingValue("keyPassword", "KEY_PASSWORD") ?: storePass
+def haveSigning = storePath && storePass
+
+android {
+    namespace "com.cyberchef.mobile"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.cyberchef.mobile"
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName "11.5.0"
+    }
+
+    signingConfigs {
+        release {
+            if (haveSigning) {
+                storeFile rootProject.file(storePath)
+                storePassword storePass
+                keyAlias keyAliasName
+                keyPassword keyPass
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            if (haveSigning) {
+                signingConfig signingConfigs.release
+            }
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    androidResources {
+        // WebAssembly cannot be stream-compiled out of a compressed asset.
+        noCompress += ["wasm"]
+    }
+
+    packaging {
+        resources {
+            excludes += ["META-INF/*.kotlin_module", "META-INF/DEPENDENCIES", "DebugProbesKt.bin"]
+        }
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+
+    buildFeatures {
+        buildConfig = false
+    }
+}
+
+dependencies {
+    // WebViewAssetLoader: serves APK assets from a real https origin so that
+    // Web Workers, localStorage and fetch() all behave like they do on the web.
+    implementation "androidx.webkit:webkit:1.12.1"
+
+    // WindowInsetsCompat / WindowCompat for edge-to-edge layout on API 35+.
+    implementation "androidx.core:core:1.13.1"
+}

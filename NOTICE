@@ -1,0 +1,47 @@
+CyberChef for Android
+=====================
+
+This product includes software developed as part of CyberChef
+(https://github.com/gchq/CyberChef).
+Copyright Crown Copyright 2016-2026. Licensed under the Apache License,
+Version 2.0.
+
+This product includes the CyberChef web application, unmodified, rebuilt from
+the revision recorded in CYBERCHEF_VERSION and bundled inside an Android
+application.
+
+
+NOT AN OFFICIAL CYBERCHEF RELEASE
+---------------------------------
+
+This is an independent, unofficial Android port. It is not produced,
+endorsed, sponsored or approved by GCHQ, the Crown, or the CyberChef
+maintainers. "CyberChef" is the name of the upstream project; the Apache
+License, Version 2.0, grants no rights to the name or to any trade mark
+(section 6). Bug reports about this Android application belong here, not in
+the upstream issue tracker.
+
+
+WHAT THIS REPOSITORY ADDS
+-------------------------
+
+No file of the upstream project is modified. On top of the unmodified web
+build this repository adds:
+
+  mobile/preinit.js     viewport meta tag and touch-layout detection, injected
+                        into <head> before first paint
+  mobile/mobile.css     touch stylesheet, scoped to html.cc-mobile
+  mobile/mobile.js      touch UI (tab bar, resizable split workspace, per-step
+                        controls) and the bridge to the native shell
+  android/              the Android shell: WebView host, asset loader, file
+                        save/open, clipboard, back-button handling
+  scripts/              packaging, testing, screenshot and build tooling
+  docs/                 user guide and release process
+
+These additions, and the packaging that combines them with the upstream build,
+are Copyright 2026 the authors of this repository and are licensed under the
+Apache License, Version 2.0 (see LICENSE).
+
+The third-party licence notices of every library bundled into the web build
+are carried inside the application assets as the upstream build emits them
+(*.LICENSE.txt), and are included in the distributed APK unaltered.

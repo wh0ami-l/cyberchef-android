@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CyberChef</string>
+    <string name="loading">Loading CyberChef…</string>
+    <string name="dialog_prompt_title">CyberChef</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="toast_saved">Saved to Downloads/CyberChef/%1$s</string>
+    <string name="toast_save_failed">Could not save the file: %1$s</string>
+    <string name="toast_save_failed_simple">Could not save the file</string>
+    <string name="toast_need_storage">Storage permission is needed to save files. Grant it and try again.</string>
+    <string name="toast_copied">Copied to clipboard</string>
+    <string name="chooser_title">Select a file to open in CyberChef</string>
+    <string name="external_link_title">Open in browser?</string>
+    <string name="external_link_message">%1$s will open outside CyberChef.</string>
+    <string name="exit_title">Exit CyberChef?</string>
+    <string name="exit_message">Your recipe and input are kept, so you can carry on where you left off.</string>
+    <string name="exit_confirm">Exit</string>
+</resources>
